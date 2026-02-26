@@ -1,13 +1,15 @@
 import streamlit as st
 import yfinance as yf
 import google.generativeai as genai
+from google.generativeai import types
 import plotly.graph_objects as go
 
 # --- 1. APIキーの設定 ---
 try:
     if "gemini" in st.secrets:
         api_key = st.secrets["gemini"]["api_key"]
-        genai.configure(api_key=api_key)
+        # 【ここが最重要】正式版の v1 通信を使うように強制指定します
+        genai.configure(api_key=api_key, transport='grpc')
     else:
         st.error("Secretsに 'api_key' が設定されていません。")
 except Exception as e:
@@ -20,25 +22,33 @@ st.title("🤖 先生専用：AI自動投資分析アプリ")
 st.header("📊 本日の市況を分析")
 
 if st.button('最新の市況をAIで分析する'):
-    with st.spinner('最新のGemini 1.5 Flashで分析中...'):
+    with st.spinner('AIが最新情報を分析中...'):
         try:
-            # 【解決策】モデル名を最新の 'gemini-1.5-flash' に変更
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # 呼び出し方を最も確実な形式に変更しました
+            model = genai.GenerativeModel(model_name='gemini-1.5-flash')
             
-            prompt = "あなたはプロの投資家です。2026年2月26日の日米株式市場について、背景と本質を短く分析してください。"
+            prompt = """
+            あなたはプロの投資家です。本日（2026年2月26日）の最新の金融ニュースに基づき、以下の構成で分析してください。
+            
+            1. 【アメリカ市況分析】背景と、相場の本質
+            2. 【日本市況分析】背景と、相場の本質
+            3. 現在の相場サイクル（日米それぞれ：金融・業績・逆金融・逆業績相場から判定）
+            4. セクター別の追い風（日米の注目業種）
+            5. 個別銘柄ピック（三菱重工、住友電工、関電工、東京応化、SWCCの中から本日の推奨）
+            """
             
             # 生成実行
             response = model.generate_content(prompt)
             
             st.markdown("---")
-            st.success("分析が完了しました")
-            st.write(response.text)
+            st.success("AI分析の準備が整いました")
+            st.markdown(response.text)
             st.markdown("---")
                 
         except Exception as e:
-            st.error("AIとの通信に失敗しました。")
+            st.error("通信エラーが発生しました。")
             st.info(f"技術的なエラー詳細: {e}")
-            st.write("このエラーが出る場合は、APIキー作成時に『Create API key in new project』を選んだか確認してください。")
+            st.write("もし404が続く場合は、APIキーが『Google AI Studio』の新しいプロジェクトで作成されたものか再確認してください。")
 
 st.markdown("---")
 
