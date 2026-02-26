@@ -7,15 +7,29 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="森を見て木を見る投資アプリ", layout="wide")
 st.title("🌲 森を見て木を見る投資アプリ")
 
-# --- 1. 森の分析（相場サイクル） ---
-st.header("📊 現在の相場サイクル")
-col1, col2 = st.columns(2)
-with col1:
-    st.info("🇺🇸 アメリカ：【業績相場】")
-    st.write("高金利を企業の稼ぐ力（EPS）が上回る。AI・公共事業が主役。")
-with col2:
-    st.success("🇯🇵 日本：【金融相場 ＋ 業績相場】")
-    st.write("円安と国策（インフラ・防衛）のダブルメリット。")
+# --- 1. 森の分析（相場サイクルと詳細分析） ---
+st.header("📊 現在の相場サイクルと市況分析")
+
+# アメリカと日本を横に並べる設定
+col_us, col_jp = st.columns(2)
+
+with col_us:
+    st.subheader("🇺🇸 アメリカ：【業績相場】")
+    st.markdown("""
+    **【AI実需への回帰とトランプリスク】**
+    - **背景**: エヌビディア（NVDA）の好決算が「AIバブル崩壊論」を粉砕。昨夜の一般教書演説でトランプ大統領が「軍事増強」と「外交解決」のバランスに触れたことで、過度な地政学リスクが後退しました。
+    - **相場の本質**: 「期待から実績への移行」。M7が「AIでどれだけ稼げるか」という疑念に対し、物理的なインフラ（データセンター）への支出を維持していることが確認されました。
+    """)
+
+with col_jp:
+    st.subheader("🇯🇵 日本：【金融相場 ＋ 業績相場】")
+    st.markdown("""
+    **【高市トレードと最高値更新】**
+    - **背景**: 高市首相による「利上げ難色」発言で、日銀の早期利上げ観測が後退（円安155-156円）。これが輸出株の採算向上と、ハイテク株への追い風になっています。
+    - **相場の本質**: 「官製円安×インフラ特需」。米国が求めるAIインフラを支える部品・重工・電線において、日本が唯一無二のサプライヤーとして再評価されています。
+    """)
+
+st.markdown("---")
 
 # --- 2. 木の分析（個別銘柄チャート） ---
 st.header("🔍 注目の木（監視銘柄）")
@@ -33,8 +47,8 @@ tickers = {
 selection = st.selectbox("銘柄を選んでください", list(tickers.keys()))
 ticker_symbol = tickers[selection]
 
-# データの取得
-data = yf.download(ticker_symbol, period="2y", interval="1mo")
+# データの取得（月足）
+data = yf.download(ticker_symbol, period="5y", interval="1mo")
 
 if not data.empty:
     # 月足チャートの作成
@@ -44,7 +58,11 @@ if not data.empty:
                     low=data['Low'],
                     close=data['Close'])])
     
-    fig.update_layout(title=f"{selection} - 月足チャート", xaxis_rangeslider_visible=False)
+    fig.update_layout(
+        title=f"{selection} - 月足チャート",
+        xaxis_rangeslider_visible=False,
+        height=500
+    )
     st.plotly_chart(fig, use_container_width=True)
 
     # 財務情報の簡易表示
@@ -56,7 +74,7 @@ if not data.empty:
     c2.metric("配当利回り", f"{info.get('dividendYield', 0)*100:.2f}%" if info.get('dividendYield') else "無配")
     c3.metric("現在値", f"{info.get('currentPrice', 0)} 円")
 else:
-    st.error("データの取得に失敗しました。")
+    st.error("データの取得に失敗しました。少し待ってから再読み込みしてください。")
 
 st.markdown("---")
-st.caption("2026年2月26日時点の思考アルゴリズムに基づき生成")
+st.caption("2026年2月26日 最終更新：先生の思考アルゴリズムに基づき分析")
