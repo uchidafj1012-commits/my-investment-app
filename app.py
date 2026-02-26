@@ -3,50 +3,39 @@ import yfinance as yf
 import google.generativeai as genai
 import plotly.graph_objects as go
 
-# --- 1. APIキーの設定 ---
+# --- 設定の読み込み ---
 try:
     if "gemini" in st.secrets:
-        # キーの設定（最もシンプルな呼び出し方）
-        genai.configure(api_key=st.secrets["gemini"]["api_key"])
+        api_key = st.secrets["gemini"]["api_key"]
+        # APIキーの前後にある可能性のある「隠れたスペース」を削除して設定
+        genai.configure(api_key=api_key.strip())
     else:
-        st.error("Secretsに 'api_key' が設定されていません。")
+        st.error("Secretsに 'api_key' が見つかりません。")
 except Exception as e:
-    st.error(f"設定エラー: {e}")
+    st.error(f"初期設定エラー: {e}")
 
-st.set_page_config(page_title="AI投資分析ダッシュボード", layout="wide")
-st.title("🤖 先生専用：AI自動投資分析アプリ")
+st.title("🤖 投資分析アプリ（疎通テスト版）")
 
-# --- 2. AIによる自動分析ボタン ---
-st.header("📊 本日の市況を分析")
+if st.button('AI接続テスト開始'):
+    with st.spinner('通信テスト中...'):
+        # 検証：3つの異なる名前で順番に接続を試みます
+        test_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+        success = False
+        
+        for m_name in test_models:
+            try:
+                model = genai.GenerativeModel(m_name)
+                response = model.generate_content("こんにちは、接続テストです。短く返信してください。")
+                st.success(f"成功！ モデル名: {m_name}")
+                st.write(f"AIからの返信: {response.text}")
+                success = True
+                break # 1つでも成功すれば終了
+            except Exception as e:
+                st.write(f"× {m_name} は接続不可")
+        
+        if not success:
+            st.error("すべてのモデル名で接続に失敗しました。")
+            st.info("原因の可能性: APIキーがまだ有効化されていないか、支払情報の登録（無料枠でも必要な場合があります）に関する制限かもしれません。")
 
-if st.button('最新の市況をAIで分析する'):
-    with st.spinner('AIが最新情報を分析中...'):
-        try:
-            # モデル名を 'gemini-1.5-flash' に固定します
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            
-            prompt = "あなたはプロの投資家です。本日の日米株式市場の動きを、専門家らしい洞察で簡潔に分析してください。"
-            
-            # 生成実行
-            response = model.generate_content(prompt)
-            
-            if response.text:
-                st.markdown("---")
-                st.success("AI分析が成功しました")
-                st.markdown(response.text)
-                st.markdown("---")
-                
-        except Exception as e:
-            st.error("通信エラーが発生しました。")
-            st.info(f"技術的なエラー詳細: {e}")
-
-# --- 3. 個別銘柄チャート（これまでの機能） ---
-st.header("🔍 個別銘柄の確認")
-tickers = {"三菱重工": "7011.T", "住友電工": "5802.T", "関電工": "1942.T", "東京応化": "4186.T", "SWCC": "5805.T"}
-selection = st.selectbox("銘柄を選んでください", list(tickers.keys()))
-
-data = yf.download(tickers[selection], period="5y", interval="1mo")
-if not data.empty:
-    fig = go.Figure(data=[go.Candlestick(x=data.index, open=data['Open'], high=data['High'], low=data['Low'], close=data['Close'])])
-    fig.update_layout(title=f"{selection} 月足チャート", xaxis_rangeslider_visible=False, height=500)
-    st.plotly_chart(fig, use_container_width=True)
+st.markdown("---")
+st.caption("2026年2月27日 検証実行中")
