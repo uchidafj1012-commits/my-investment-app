@@ -6,8 +6,8 @@ import plotly.graph_objects as go
 # 鍵を読み込む設定
 try:
     api_key = st.secrets["gemini"]["api_key"]
-    # ここで「正式版(v1)」を使うように明示的に設定します
-    genai.configure(api_key=api_key, transport='grpc') 
+    # 接続設定をさらにシンプルに直しました
+    genai.configure(api_key=api_key) 
 except Exception as e:
     st.error("APIキーの設定が見つかりません。Settings > Secrets を確認してください。")
 
@@ -18,8 +18,8 @@ st.title("🤖 先生専用：AI自動投資分析アプリ")
 if st.button('最新の市況をAIで分析する'):
     with st.spinner('Geminiが最新情報を分析中...'):
         try:
-            # 最新かつ軽量な 'gemini-1.5-flash' を使用します
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # 名前を「最新・安定版」のフルネームに変更
+            model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
             
             prompt = """
             あなたはプロの投資家です。本日（2026年2月26日）の最新の金融ニュースに基づき、以下の構成で分析してください。
@@ -36,7 +36,6 @@ if st.button('最新の市況をAIで分析する'):
             response = model.generate_content(prompt)
             st.markdown(response.text)
         except Exception as e:
-            # もしエラーが出ても原因がわかるように詳細を表示します
             st.error(f"分析中にエラーが発生しました。時間を置いて試してください。")
             st.info(f"技術的なエラー詳細: {e}")
 
