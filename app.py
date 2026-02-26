@@ -1,3 +1,4 @@
+
 import streamlit as st
 import yfinance as yf
 import google.generativeai as genai
@@ -17,11 +18,11 @@ st.title("🤖 先生専用：AI自動投資分析アプリ")
 if st.button('最新の市況をAIで分析する'):
     with st.spinner('Geminiが最新ニュースを分析中...'):
         try:
-            # モデル名を最新の 'gemini-1.5-flash' に固定
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # 最も確実に動くモデル名 'gemini-pro' を試します
+            model = genai.GenerativeModel('gemini-pro')
             
             prompt = """
-            プロの投資家として、本日（2026年2月26日）の最新市況を以下の構成で分析してください。
+            あなたはプロの投資家です。本日（2026年2月26日）の最新の金融ニュースに基づき、以下の構成で分析してください。
             
             1. 【アメリカ市況分析】背景と、相場の本質
             2. 【日本市況分析】背景と、相場の本質
@@ -35,7 +36,7 @@ if st.button('最新の市況をAIで分析する'):
             response = model.generate_content(prompt)
             st.markdown(response.text)
         except Exception as e:
-            st.error(f"分析中にエラーが発生しました。APIキーが有効か、または少し時間を置いて試してください。エラー詳細: {e}")
+            st.error(f"分析中にエラーが発生しました。時間を置いて試してください。エラー詳細: {e}")
 
 st.markdown("---")
 
