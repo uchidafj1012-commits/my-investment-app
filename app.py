@@ -18,12 +18,13 @@ if st.button('分析を実行する'):
         st.error("APIキーが設定されていません。")
     else:
         with st.spinner('AIが回答を生成中...'):
-            # 【今回の修正点】URLの「v1」と「gemini-1.5-flash」の組み合わせを最新仕様に固定
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            # 【究極のシンプル化】
+            # 最も古くからある名称 'gemini-pro' のみを使用し、URLも正式版(v1)に固定
+            url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={api_key}"
             
             payload = {
                 "contents": [{
-                    "parts": [{"text": "あなたはプロの投資家です。2026年2月27日の株式市場について、日本とアメリカの状況を投資家視点で短く教えて。"}]
+                    "parts": [{"text": "プロの投資家として、本日2026年2月27日の日米市況を短く教えてください。"}]
                 }]
             }
             
@@ -34,22 +35,11 @@ if st.button('分析を実行する'):
                 if response.status_code == 200:
                     answer = res_data['candidates'][0]['content']['parts'][0]['text']
                     st.success("分析が完了しました")
-                    st.markdown("---")
                     st.write(answer)
-                    st.markdown("---")
                 else:
-                    # エラーが出た場合、自動で「旧型モデル」で再試行する仕組みを追加
-                    st.warning("最新モデルが準備中のため、安定版で再試行します...")
-                    url_retry = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={api_key}"
-                    response_retry = requests.post(url_retry, json=payload, headers={'Content-Type': 'application/json'})
-                    
-                    if response_retry.status_code == 200:
-                        answer = response_retry.json()['candidates'][0]['content']['parts'][0]['text']
-                        st.success("安定版モデルで分析を完了しました")
-                        st.write(answer)
-                    else:
-                        st.error(f"Googleサーバーからエラーが返されました (Status: {response.status_code})")
-                        st.json(res_data)
+                    st.error(f"Googleサーバーが準備中です (Status: {response.status_code})")
+                    st.write("このエラーはAPIキーが有効化されるまでの待機時間を示しています。")
+                    st.json(res_data)
                     
             except Exception as e:
                 st.error(f"通信に失敗しました: {e}")
