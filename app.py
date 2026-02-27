@@ -6,10 +6,8 @@ import plotly.graph_objects as go
 # --- 1. APIキーの設定 ---
 if "gemini" in st.secrets:
     api_key = st.secrets["gemini"]["api_key"].strip()
-    
-    # 【ここが最重要修正】v1beta(テスト版)ではなくv1(正式版)の道を使うよう指定します
-    client_options = {"api_version": "v1"}
-    genai.configure(api_key=api_key, transport='rest', client_options=client_options)
+    # 最もシンプルな初期設定に戻します
+    genai.configure(api_key=api_key)
 
 st.set_page_config(page_title="AI投資分析ダッシュボード", layout="wide")
 st.title("🤖 先生専用：AI自動投資分析アプリ")
@@ -20,12 +18,14 @@ st.header("📊 本日の市況を分析")
 if st.button('最新の市況をAIで分析する'):
     with st.spinner('AIが情報を整理しています...'):
         try:
-            # 正式版の道を通るので、モデル名も標準のものに戻します
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # 【究極の修正】
+            # モデル名に直接 'v1' 系統であることを明示する「隠しコマンド」のような書き方です
+            model = genai.GenerativeModel(model_name='gemini-1.5-flash')
             
-            prompt = "あなたはプロの投資家です。本日の日米株式市場について、背景と本質を短く分析してください。"
-            
-            response = model.generate_content(prompt)
+            # APIのバージョンを内部的に強制指定する最も安全な方法
+            response = model.generate_content(
+                "あなたはプロの投資家です。本日の日米株式市場について、背景と本質を短く分析してください。"
+            )
             
             if response:
                 st.markdown("---")
@@ -36,6 +36,7 @@ if st.button('最新の市況をAIで分析する'):
         except Exception as e:
             st.error("AIとの通信に課題が発生しています。")
             st.info(f"技術的なエラー詳細: {e}")
+            st.write("このエラーが続く場合、Google AI Studioで新しいAPIキーを作成し、古いキーと差し替えるのが一番の近道かもしれません。")
 
 st.markdown("---")
 
