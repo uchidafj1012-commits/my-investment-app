@@ -6,8 +6,10 @@ import plotly.graph_objects as go
 # --- 1. APIキーの設定 ---
 if "gemini" in st.secrets:
     api_key = st.secrets["gemini"]["api_key"].strip()
-    # 通信の通り道を「正式版(v1)」に固定して設定します
-    genai.configure(api_key=api_key, transport='rest')
+    
+    # 【ここが最重要修正】v1beta(テスト版)ではなくv1(正式版)の道を使うよう指定します
+    client_options = {"api_version": "v1"}
+    genai.configure(api_key=api_key, transport='rest', client_options=client_options)
 
 st.set_page_config(page_title="AI投資分析ダッシュボード", layout="wide")
 st.title("🤖 先生専用：AI自動投資分析アプリ")
@@ -18,8 +20,8 @@ st.header("📊 本日の市況を分析")
 if st.button('最新の市況をAIで分析する'):
     with st.spinner('AIが情報を整理しています...'):
         try:
-            # 【重要】モデル名の前に 'models/' を付与し、正式な個体を指名します
-            model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
+            # 正式版の道を通るので、モデル名も標準のものに戻します
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
             prompt = "あなたはプロの投資家です。本日の日米株式市場について、背景と本質を短く分析してください。"
             
@@ -34,7 +36,6 @@ if st.button('最新の市況をAIで分析する'):
         except Exception as e:
             st.error("AIとの通信に課題が発生しています。")
             st.info(f"技術的なエラー詳細: {e}")
-            st.write("もし404が出る場合は、Google側のAPIサーバーが先生の新しいキーを認識するまで、あと数分だけ待機が必要です。")
 
 st.markdown("---")
 
