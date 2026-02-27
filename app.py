@@ -15,26 +15,31 @@ st.title("🤖 先生専用：AI自動投資分析アプリ")
 st.header("📊 本日の市況を分析")
 
 if st.button('最新の市況をAIで分析する'):
-    with st.spinner('AIが情報を整理しています...（開通直後は時間がかかる場合があります）'):
+    with st.spinner('AIが情報を整理しています...'):
         try:
-            # 最新の 1.5 Flash モデルを使用
-            # 'models/' を頭につけることで、Google側に「正式な場所にあるモデルだよ」と再認識させます
-model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
+            # 最新の 1.5 Flash モデルを正式な名前で呼び出し
+            model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
             
             prompt = """
             あなたはプロの投資家です。本日（2026年2月27日）の最新の金融状況に基づき、
-            日本とアメリカの市況、注目銘柄（三菱重工、住友電工、関電工、東京応化、SWCC）についての洞察を述べてください。
+            以下の構成で鋭い分析を提供してください。
+            1. 【日米市況】背景と本質
+            2. 【相場サイクル】現在はどの局面か
+            3. 【銘柄洞察】三菱重工、住友電工、関電工、東京応化、SWCCへのコメント
             """
             
             response = model.generate_content(prompt)
             st.markdown("---")
+            st.success("分析が完了しました")
             st.markdown(response.text)
             st.markdown("---")
                 
         except Exception as e:
-            st.error("現在、GoogleのAIサーバーが開通処理を行っています。")
+            # エラーが起きた際、詳細を表示して原因を切り分けます
+            st.error("AIとの通信に課題が発生しています。")
             st.info(f"技術的なエラー詳細: {e}")
-            st.write("※APIキー作成後、完全に有効化されるまで1時間程度かかる場合があります。このまましばらくお待ちください。")
+            if "404" in str(e):
+                st.warning("ヒント：Google側の『開通』がまだ完了していない可能性があります。1.0 Proモデルへの切り替えを検討するか、もう少し時間を置く必要があります。")
 
 st.markdown("---")
 
@@ -45,8 +50,4 @@ selection = st.selectbox("銘柄を選んでください", list(tickers.keys()))
 
 data = yf.download(tickers[selection], period="5y", interval="1mo")
 if not data.empty:
-    fig = go.Figure(data=[go.Candlestick(x=data.index, open=data['Open'], high=data['High'], low=data['Low'], close=data['Close'])])
-    fig.update_layout(title=f"{selection} 月足チャート", xaxis_rangeslider_visible=False, height=500)
-    st.plotly_chart(fig, use_container_width=True)
-
-st.caption("2026年2月27日 運用中")
+    fig = go.Figure(data=[go.Candlestick(x=data.index, open=data['Open'], high
