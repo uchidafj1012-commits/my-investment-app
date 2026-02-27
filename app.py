@@ -35,11 +35,8 @@ if st.button('最新の市況をAIで分析する'):
             st.markdown("---")
                 
         except Exception as e:
-            # エラーが起きた際、詳細を表示して原因を切り分けます
             st.error("AIとの通信に課題が発生しています。")
             st.info(f"技術的なエラー詳細: {e}")
-            if "404" in str(e):
-                st.warning("ヒント：Google側の『開通』がまだ完了していない可能性があります。1.0 Proモデルへの切り替えを検討するか、もう少し時間を置く必要があります。")
 
 st.markdown("---")
 
@@ -48,6 +45,24 @@ st.header("🔍 個別銘柄チャート")
 tickers = {"三菱重工": "7011.T", "住友電工": "5802.T", "関電工": "1942.T", "東京応化": "4186.T", "SWCC": "5805.T"}
 selection = st.selectbox("銘柄を選んでください", list(tickers.keys()))
 
+# データの取得
 data = yf.download(tickers[selection], period="5y", interval="1mo")
+
 if not data.empty:
-    fig = go.Figure(data=[go.Candlestick(x=data.index, open=data['Open'], high
+    # 修正箇所：カッコを確実に閉じたチャート作成コード
+    fig = go.Figure(data=[go.Candlestick(
+        x=data.index, 
+        open=data['Open'], 
+        high=data['High'], 
+        low=data['Low'], 
+        close=data['Close']
+    )])
+    
+    fig.update_layout(
+        title=f"{selection} 月足チャート", 
+        xaxis_rangeslider_visible=False, 
+        height=500
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+st.caption("2026年2月27日 運用中")
