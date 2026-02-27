@@ -20,7 +20,7 @@ if st.button('最新の市況をAIで分析する'):
         try:
             # 【究極の修正】
             # モデル名に直接 'v1' 系統であることを明示する「隠しコマンド」のような書き方です
-            model = genai.GenerativeModel(model_name='gemini-1.5-flash')
+           model = genai.GenerativeModel(model_name='gemini-pro')
             
             # APIのバージョンを内部的に強制指定する最も安全な方法
             response = model.generate_content(
