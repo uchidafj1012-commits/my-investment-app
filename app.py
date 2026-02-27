@@ -18,7 +18,8 @@ if st.button('最新の市況をAIで分析する'):
     with st.spinner('AIが情報を整理しています...（開通直後は時間がかかる場合があります）'):
         try:
             # 最新の 1.5 Flash モデルを使用
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # 'models/' を頭につけることで、Google側に「正式な場所にあるモデルだよ」と再認識させます
+model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
             
             prompt = """
             あなたはプロの投資家です。本日（2026年2月27日）の最新の金融状況に基づき、
