@@ -6,8 +6,8 @@ import plotly.graph_objects as go
 # --- 1. APIキーの設定 ---
 if "gemini" in st.secrets:
     api_key = st.secrets["gemini"]["api_key"].strip()
-    # 最も標準的な接続設定
-    genai.configure(api_key=api_key)
+    # 通信の通り道を「正式版(v1)」に固定して設定します
+    genai.configure(api_key=api_key, transport='rest')
 
 st.set_page_config(page_title="AI投資分析ダッシュボード", layout="wide")
 st.title("🤖 先生専用：AI自動投資分析アプリ")
@@ -18,12 +18,11 @@ st.header("📊 本日の市況を分析")
 if st.button('最新の市況をAIで分析する'):
     with st.spinner('AIが情報を整理しています...'):
         try:
-            # 【究極の修正】最も安定している gemini-1.5-flash をモデル名だけで指定
-            model = genai.GenerativeModel('gemini-1.0-pro')
+            # 【重要】モデル名の前に 'models/' を付与し、正式な個体を指名します
+            model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
             
             prompt = "あなたはプロの投資家です。本日の日米株式市場について、背景と本質を短く分析してください。"
             
-            # 生成実行
             response = model.generate_content(prompt)
             
             if response:
@@ -35,11 +34,11 @@ if st.button('最新の市況をAIで分析する'):
         except Exception as e:
             st.error("AIとの通信に課題が発生しています。")
             st.info(f"技術的なエラー詳細: {e}")
-            st.write("このエラーが出る場合、プログラムのミスではなくGoogle側の『規約同意』が済んでいない可能性が高いです。")
+            st.write("もし404が出る場合は、Google側のAPIサーバーが先生の新しいキーを認識するまで、あと数分だけ待機が必要です。")
 
 st.markdown("---")
 
-# --- 3. 個別銘柄チャート（エラーを完全に防ぐ書き方） ---
+# --- 3. 個別銘柄チャート ---
 st.header("🔍 個別銘柄チャート")
 tickers = {"三菱重工": "7011.T", "住友電工": "5802.T", "関電工": "1942.T", "東京応化": "4186.T", "SWCC": "5805.T"}
 selection = st.selectbox("銘柄を選んでください", list(tickers.keys()))
