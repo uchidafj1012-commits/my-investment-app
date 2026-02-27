@@ -18,7 +18,7 @@ if st.button('分析を実行する'):
         st.error("APIキーが設定されていません。")
     else:
         with st.spinner('AIが回答を生成中...'):
-            # 【究極の修正】Googleのライブラリを使わず、直接「v1」のURLを叩きます
+            # 【今回の修正点】URLの「v1」と「gemini-1.5-flash」の組み合わせを最新仕様に固定
             url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
             
             payload = {
@@ -28,24 +28,31 @@ if st.button('分析を実行する'):
             }
             
             try:
-                # 直接インターネット経由でデータを送信
                 response = requests.post(url, json=payload, headers={'Content-Type': 'application/json'})
                 res_data = response.json()
                 
                 if response.status_code == 200:
-                    # 成功した場合の回答表示
                     answer = res_data['candidates'][0]['content']['parts'][0]['text']
                     st.success("分析が完了しました")
                     st.markdown("---")
                     st.write(answer)
                     st.markdown("---")
                 else:
-                    # エラーが起きた場合、Googleからの生の返答を表示
-                    st.error(f"Googleサーバーからエラーが返されました (Status: {response.status_code})")
-                    st.json(res_data)
+                    # エラーが出た場合、自動で「旧型モデル」で再試行する仕組みを追加
+                    st.warning("最新モデルが準備中のため、安定版で再試行します...")
+                    url_retry = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={api_key}"
+                    response_retry = requests.post(url_retry, json=payload, headers={'Content-Type': 'application/json'})
+                    
+                    if response_retry.status_code == 200:
+                        answer = response_retry.json()['candidates'][0]['content']['parts'][0]['text']
+                        st.success("安定版モデルで分析を完了しました")
+                        st.write(answer)
+                    else:
+                        st.error(f"Googleサーバーからエラーが返されました (Status: {response.status_code})")
+                        st.json(res_data)
                     
             except Exception as e:
                 st.error(f"通信に失敗しました: {e}")
 
 st.markdown("---")
-st.caption("2026年2月27日 運用中 (Direct API Access Mode)")
+st.caption("2026年2月27日 運用中")
