@@ -19,7 +19,7 @@ if st.button('最新の市況をAIで分析する'):
     with st.spinner('AIが情報を整理しています...'):
         try:
             # 【究極の修正】最も安定している gemini-1.5-flash をモデル名だけで指定
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-1.0-pro')
             
             prompt = "あなたはプロの投資家です。本日の日米株式市場について、背景と本質を短く分析してください。"
             
