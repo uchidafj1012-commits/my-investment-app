@@ -19,7 +19,7 @@ if st.button('分析を実行する'):
     else:
         with st.spinner('AIが回答を生成中...'):
             # 【今回の修正点】URLの「v1」と「gemini-1.5-flash」の組み合わせを最新仕様に固定
-            url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
             
             payload = {
                 "contents": [{
